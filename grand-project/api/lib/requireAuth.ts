@@ -11,8 +11,6 @@ export async function requireAuth(req: NextApiRequest, res: NextApiResponse, nex
   if (error || !user) {
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
-
-  // attach user to req for downstream
   (req as any).user = user;
   return next();
 }

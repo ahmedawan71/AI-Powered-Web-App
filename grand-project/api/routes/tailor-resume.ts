@@ -7,7 +7,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Auth guard
   await requireAuth(req, res, async () => {
     const { resume_text, job_description } = req.body;
 
@@ -16,12 +15,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const user = (req as any).user;
-    // TODO: enqueue to n8n webhook or call your LLM service here
-    // placeholder:
-    const tailored_text = `TAILORED: ${resume_text.slice(0, 50)}...`;
-    const feedback = `Feedback for job: ${job_description.slice(0, 50)}...`;
+    const response = await fetch('http://localhost:5678/webhook/tailor-resume', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Pass user_id in the body so n8n can record it
+      },
+      body: JSON.stringify({
+        user_id: user.id,
+        resume_text,
+        job_description
+      })
+    });
+    if (!response.ok) throw new Error('n8n workflow error');
+    const { tailored_text, feedback } = await response.json();
 
-    // Save to DB
+
     const { data, error } = await supabase
       .from('resumes')
       .insert({
