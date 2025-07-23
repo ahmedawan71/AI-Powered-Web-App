@@ -1,23 +1,60 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/api/lib/supabaseClient";
 
 export default function Dashboard() {
   const [resume, setResume] = useState("");
   const [jd, setJd] = useState("");
+  const [token, setToken] = useState<string | null>(null);
   const router = useRouter();
 
+  // Get the Supabase session token when the component mounts
+  useEffect(() => {
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log("Session:", session); // Debug: Check if session exists
+      if (session) {
+        setToken(session.access_token);
+        console.log(token)
+      } else {
+        alert("Please log in to tailor your resume.");
+        router.push("/login");
+      }
+    };
+    getSession();
+  }, [router]);
+
   const handleSubmit = async () => {
+    if (!resume || !jd) {
+      alert("Please enter both resume and job description.");
+      return;
+    }
+    if (!token) {
+      alert("You must be logged in to tailor your resume.");
+      router.push("/login");
+      return;
+    }
+
     const res = await fetch("/api/tailor-resume", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // Add the token here
+      },
       body: JSON.stringify({ resume_text: resume, job_description: jd }),
     });
-    if (res.ok) router.push("/results");
-    else alert("Error tailoring resume.");
+
+    if (res.ok) {
+      router.push("/results");
+    } else {
+      const errorData = await res.json();
+      console.error("Error response:", errorData);
+      alert(`Error tailoring resume: ${errorData.error || "Unknown error"}`);
+    }
   };
 
   return (

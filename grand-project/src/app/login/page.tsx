@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../../api/lib/supabaseClient";
+import { supabase } from "../../api/lib/supabaseClient";
+import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -47,12 +48,7 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <button
-            onClick={sendLink}
-            className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-          >
-            Send Magic Link
-          </button>
+          <Button onClick={sendLink}>Send Magic Link</Button>
         </>
       )}
     </div>
