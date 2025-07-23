@@ -8,17 +8,24 @@ import { Button } from "@/components/ui/button";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const sendLink = async () => {
+    setLoading(true);
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/dashboard`,
       },
     });
-    if (!error) setSent(true);
-    else alert(`Error: ${error.message}`);
+    
+    if (!error) {
+      setSent(true);
+    } else {
+      alert(`Error: ${error.message}`);
+    }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -48,7 +55,12 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <Button onClick={sendLink}>Send Magic Link</Button>
+          <Button 
+            onClick={sendLink} 
+            disabled={loading || !email}
+          >
+            {loading ? "Sending..." : "Send Magic Link"}
+          </Button>
         </>
       )}
     </div>

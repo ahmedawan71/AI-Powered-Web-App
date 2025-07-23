@@ -23,20 +23,24 @@ export async function POST(req: Request) {
           original_text: resume_text,
           tailored_text: tailoredData.tailored_text,
           job_description,
-          feedback: tailoredData.feedback, // Add feedback to insert
+          feedback: tailoredData.feedback,
         })
         .select()
         .single();
 
       if (error) {
-        console.error('Supabase insert error:', error.message, error.details);
         throw new Error(`Database error: ${error.message}`);
       }
 
-      return NextResponse.json({ resume: data, tailored_text: tailoredData.tailored_text, feedback: tailoredData.feedback });
+      return NextResponse.json({ 
+        resume: data, 
+        tailored_text: tailoredData.tailored_text, 
+        feedback: tailoredData.feedback 
+      });
     });
   } catch (error: any) {
-    console.error('API error:', error.message, error.stack);
-    return NextResponse.json({ error: `Internal server error: ${error.message}` }, { status: 500 });
+    return NextResponse.json({ 
+      error: `Internal server error: ${error.message}` 
+    }, { status: 500 });
   }
 }

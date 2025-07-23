@@ -2,60 +2,101 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/api/lib/supabaseClient";
-import { Textarea } from "@/components/ui/textarea";
+import { supabase } from "../../api/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
 
+interface Resume {
+  id: string;
+  original_text: string;
+  tailored_text: string;
+  job_description: string;
+  feedback: string;
+  created_at: string;
+}
+
 export default function ResultsPage() {
-  const [resume, setResume] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [latestResume, setLatestResume] = useState<Resume | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const fetchResume = async () => {
-      try {
-        // Fetch the latest resume from Supabase
-        const { data, error } = await supabase
-          .from("resumes")
-          .select("tailored_text, feedback")
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .single();
-
-        if (error) {
-          console.error("Supabase fetch error:", error.message);
-          alert("Failed to load resume: " + error.message);
-          router.push("/dashboard");
-          return;
-        }
-
-        setResume(data.tailored_text || "No tailored resume available");
-        setFeedback(data.feedback || "No feedback available");
-      } catch (err) {
-        console.error("Fetch error:", err);
-        alert("Error loading resume");
-        router.push("/dashboard");
-      } finally {
-        setLoading(false);
+    const fetchLatestResume = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        router.push("/login");
+        return;
       }
+
+      const { data, error } = await supabase
+        .from('resumes')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error) {
+        alert("Error fetching resume data");
+        router.push("/dashboard");
+      } else {
+        setLatestResume(data);
+      }
+      setLoading(false);
     };
 
-    fetchResume();
+    fetchLatestResume();
   }, [router]);
 
   if (loading) {
-    return <div className="p-8 text-center">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading your tailored resume...</p>
+      </div>
+    );
+  }
+
+  if (!latestResume) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-8">
+        <h2 className="text-2xl font-semibold mb-4">No Resume Found</h2>
+        <Button onClick={() => router.push("/dashboard")}>
+          Go Back to Dashboard
+        </Button>
+      </div>
+    );
   }
 
   return (
-    <div className="p-8 max-w-xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-6">Tailored Resume</h2>
-      <h3 className="text-lg font-medium mb-2">Your Tailored Resume</h3>
-      <Textarea rows={10} readOnly value={resume || ""} className="mb-4" />
-      <h3 className="text-lg font-medium mb-2">Feedback</h3>
-      <Textarea rows={4} readOnly value={feedback || ""} className="mb-4" />
-      <Button onClick={() => router.push("/dashboard")}>Back to Dashboard</Button>
+    <div className="p-8 max-w-4xl mx-auto">
+      <div className="mb-6 flex justify-between items-center">
+        <h2 className="text-2xl font-semibold">Your Tailored Resume</h2>
+        <Button onClick={() => router.push("/dashboard")}>
+          Create New Resume
+        </Button>
+      </div>
+      
+      <div className="grid gap-6 md:grid-cols-2">
+        <div>
+          <h3 className="text-lg font-medium mb-2">Tailored Resume</h3>
+          <div className="p-4 border rounded-lg bg-gray-50 whitespace-pre-wrap">
+            {latestResume.tailored_text}
+          </div>
+        </div>
+        
+        <div>
+          <h3 className="text-lg font-medium mb-2">AI Feedback</h3>
+          <div className="p-4 border rounded-lg bg-blue-50 whitespace-pre-wrap">
+            {latestResume.feedback}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-6">
+        <h3 className="text-lg font-medium mb-2">Job Description</h3>
+        <div className="p-4 border rounded-lg bg-gray-50 whitespace-pre-wrap">
+          {latestResume.job_description}
+        </div>
+      </div>
     </div>
   );
 }

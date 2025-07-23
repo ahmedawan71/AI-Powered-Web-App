@@ -10,16 +10,14 @@ export default function Dashboard() {
   const [resume, setResume] = useState("");
   const [jd, setJd] = useState("");
   const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Get the Supabase session token when the component mounts
   useEffect(() => {
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      console.log("Session:", session); // Debug: Check if session exists
       if (session) {
         setToken(session.access_token);
-        console.log(token)
       } else {
         alert("Please log in to tailor your resume.");
         router.push("/login");
@@ -39,21 +37,28 @@ export default function Dashboard() {
       return;
     }
 
-    const res = await fetch("/api/tailor-resume", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // Add the token here
-      },
-      body: JSON.stringify({ resume_text: resume, job_description: jd }),
-    });
+    setLoading(true);
 
-    if (res.ok) {
-      router.push("/results");
-    } else {
-      const errorData = await res.json();
-      console.error("Error response:", errorData);
-      alert(`Error tailoring resume: ${errorData.error || "Unknown error"}`);
+    try {
+      const res = await fetch("/api/tailor-resume", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ resume_text: resume, job_description: jd }),
+      });
+
+      if (res.ok) {
+        router.push("/results");
+      } else {
+        const errorData = await res.json();
+        alert(`Error tailoring resume: ${errorData.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      alert("Network error. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,7 +79,12 @@ export default function Dashboard() {
         value={jd}
         onChange={(e) => setJd(e.target.value)}
       />
-      <Button onClick={handleSubmit}>Tailor Resume</Button>
+      <Button 
+        onClick={handleSubmit} 
+        disabled={loading}
+      >
+        {loading ? "Tailoring..." : "Tailor Resume"}
+      </Button>
     </div>
   );
 }
