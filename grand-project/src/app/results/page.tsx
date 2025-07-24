@@ -47,6 +47,25 @@ export default function ResultsPage() {
     fetchLatestResume();
   }, [router]);
 
+  const formatText = (text: string) => {
+    return text
+      .split('\n')
+      .map((line, index) => (
+        <span key={index}>
+          {line}
+          {index < text.split('\n').length - 1 && <br />}
+        </span>
+      ));
+  };
+
+  const formatTextWithCSS = (text: string) => {
+    return (
+      <div style={{ whiteSpace: 'pre-wrap' }}>
+        {text}
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -78,23 +97,30 @@ export default function ResultsPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <div>
           <h3 className="text-lg font-medium mb-2">Tailored Resume</h3>
-          <div className="p-4 border rounded-lg bg-gray-50 whitespace-pre-wrap">
-            {latestResume.tailored_text}
-          </div>
+          <div className="p-4 border rounded-lg bg-gray-50 text-sm leading-relaxed">
+            <div className="whitespace-pre-wrap">
+              {latestResume.tailored_text}
+            </div>
+            
+            </div>
         </div>
         
         <div>
           <h3 className="text-lg font-medium mb-2">AI Feedback</h3>
-          <div className="p-4 border rounded-lg bg-blue-50 whitespace-pre-wrap">
-            {latestResume.feedback}
+          <div className="p-4 border rounded-lg bg-blue-50 text-sm leading-relaxed">
+            <div className="whitespace-pre-wrap">
+              {latestResume.feedback}
+            </div>
           </div>
         </div>
       </div>
 
       <div className="mt-6">
         <h3 className="text-lg font-medium mb-2">Job Description</h3>
-        <div className="p-4 border rounded-lg bg-gray-50 whitespace-pre-wrap">
-          {latestResume.job_description}
+        <div className="p-4 border rounded-lg bg-gray-50 text-sm leading-relaxed">
+          <div className="whitespace-pre-wrap">
+            {latestResume.job_description}
+          </div>
         </div>
       </div>
     </div>

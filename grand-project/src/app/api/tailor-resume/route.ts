@@ -11,34 +11,59 @@ export async function POST(req: Request) {
     }
 
     return await requireAuth(req, async () => {
-      // Mock response for testing
-      const tailoredData = {
-        tailored_text: "Mock tailored resume",
-        feedback: "Mock feedback",
-      };
+      try {
+        const n8nResponse = await fetch('http://localhost:5678/webhook/tailor-resume', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            resume_text: resume_text,
+            job_description: job_description
+          }),
+        });
 
-      const { data, error } = await supabase
-        .from('resumes')
-        .insert({
-          original_text: resume_text,
-          tailored_text: tailoredData.tailored_text,
-          job_description,
-          feedback: tailoredData.feedback,
-        })
-        .select()
-        .single();
+        if (!n8nResponse.ok) {
+          throw new Error(`n8n webhook failed with status: ${n8nResponse.status}`);
+        }
 
-      if (error) {
-        throw new Error(`Database error: ${error.message}`);
+        const tailoredData = await n8nResponse.json();
+        
+        if (!tailoredData.tailored_text) {
+          throw new Error('Invalid response from AI service: missing tailored_text');
+        }
+
+        const { data, error } = await supabase
+          .from('resumes')
+          .insert({
+            original_text: resume_text,
+            tailored_text: tailoredData.tailored_text,
+            job_description,
+            feedback: tailoredData.feedback || 'No feedback provided',
+          })
+          .select()
+          .single();
+
+        if (error) {
+          throw new Error(`Database error: ${error.message}`);
+        }
+
+        return NextResponse.json({ 
+          resume: data, 
+          tailored_text: tailoredData.tailored_text, 
+          feedback: tailoredData.feedback || 'No feedback provided'
+        });
+
+      } catch (n8nError: any) {
+        console.error('n8n webhook error:', n8nError.message);
+        return NextResponse.json({ 
+          error: `AI service unavailable: ${n8nError.message}` 
+        }, { status: 503 });
       }
-
-      return NextResponse.json({ 
-        resume: data, 
-        tailored_text: tailoredData.tailored_text, 
-        feedback: tailoredData.feedback 
-      });
     });
+
   } catch (error: any) {
+    console.error('API error:', error.message);
     return NextResponse.json({ 
       error: `Internal server error: ${error.message}` 
     }, { status: 500 });
