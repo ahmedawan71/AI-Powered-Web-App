@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
     return await requireAuth(req, async () => {
       try {
-        const n8nResponse = await fetch(`${WEBHOOK_BASE}/webhook/tailor-resume`, {
+        const n8nResponse = await fetch(`http://localhost:5678/webhook/tailor-resume`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
