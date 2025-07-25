@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '../../../api/lib/supabaseClient';
 import { requireAuth } from '../../../api/lib/requireAuth';
+const WEBHOOK_BASE = process.env.N8N_WEBHOOK_URL!;
 
 export async function POST(req: Request) {
   try {
@@ -12,7 +13,7 @@ export async function POST(req: Request) {
 
     return await requireAuth(req, async () => {
       try {
-        const n8nResponse = await fetch('http://localhost:5678/webhook/tailor-resume', {
+        const n8nResponse = await fetch(`${WEBHOOK_BASE}/webhook/tailor-resume`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -28,7 +29,7 @@ export async function POST(req: Request) {
         }
 
         const tailoredData = await n8nResponse.json();
-        
+
         if (!tailoredData.tailored_text) {
           throw new Error('Invalid response from AI service: missing tailored_text');
         }
@@ -48,24 +49,24 @@ export async function POST(req: Request) {
           throw new Error(`Database error: ${error.message}`);
         }
 
-        return NextResponse.json({ 
-          resume: data, 
-          tailored_text: tailoredData.tailored_text, 
+        return NextResponse.json({
+          resume: data,
+          tailored_text: tailoredData.tailored_text,
           feedback: tailoredData.feedback || 'No feedback provided'
         });
 
       } catch (n8nError: any) {
         console.error('n8n webhook error:', n8nError.message);
-        return NextResponse.json({ 
-          error: `AI service unavailable: ${n8nError.message}` 
+        return NextResponse.json({
+          error: `AI service unavailable: ${n8nError.message}`
         }, { status: 503 });
       }
     });
 
   } catch (error: any) {
     console.error('API error:', error.message);
-    return NextResponse.json({ 
-      error: `Internal server error: ${error.message}` 
+    return NextResponse.json({
+      error: `Internal server error: ${error.message}`
     }, { status: 500 });
   }
 }

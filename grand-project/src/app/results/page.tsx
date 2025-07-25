@@ -115,14 +115,14 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      <div className="mt-6">
+      {/* <div className="mt-6">
         <h3 className="text-lg font-medium mb-2">Job Description</h3>
         <div className="p-4 border rounded-lg bg-gray-50 text-sm leading-relaxed">
           <div className="whitespace-pre-wrap">
             {latestResume.job_description}
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
