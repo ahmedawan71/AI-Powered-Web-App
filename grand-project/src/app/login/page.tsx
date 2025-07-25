@@ -13,13 +13,16 @@ export default function LoginPage() {
 
   const sendLink = async () => {
     setLoading(true);
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+    console.log(siteUrl)
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
+        emailRedirectTo: `${siteUrl}/dashboard`,
       },
     });
-    
+
+
     if (!error) {
       setSent(true);
     } else {
@@ -55,8 +58,8 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <Button 
-            onClick={sendLink} 
+          <Button
+            onClick={sendLink}
             disabled={loading || !email}
           >
             {loading ? "Sending..." : "Send Magic Link"}
