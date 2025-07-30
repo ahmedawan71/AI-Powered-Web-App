@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../api/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
+import jsPDF from "jspdf";  // Import jsPDF
 
 interface Resume {
   id: string;
@@ -65,6 +66,13 @@ export default function ResultsPage() {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+  };
+
+  // New function to download as PDF
+  const downloadAsPDF = (content: string, filename: string) => {
+    const doc = new jsPDF();
+    doc.text(content, 10, 10);  // Add text to PDF at position (10, 10)
+    doc.save(filename + '.pdf');  // Trigger PDF download
   };
 
   if (loading) {
@@ -149,9 +157,20 @@ export default function ResultsPage() {
               className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/50 transition-all duration-300"
             >
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-4-4m4 4l4-4m-6 4V4a 2 2 0 012-2h4a2 2 0 012 2v16a2 2 0 01-2 2H8a2 2 0 01-2-2z" />
+              </svg>
+              Download as Text
+            </Button>
+            {/* New Button for PDF Download */}
+            <Button 
+              onClick={() => downloadAsPDF(latestResume.tailored_text, 'tailored-resume')}
+              variant="outline"
+              className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/50 transition-all duration-300"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-4-4m4 4l4-4m-6 4V4a2 2 0 012-2h4a2 2 0 012 2v16a2 2 0 01-2 2H8a2 2 0 01-2-2z" />
               </svg>
-              Download
+              Download as PDF
             </Button>
             <Button 
               onClick={() => router.push("/dashboard")}

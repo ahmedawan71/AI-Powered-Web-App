@@ -16,7 +16,7 @@ export default function LandingPage() {
   
   const sendLink = async () => {
     setLoading(true);
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+    const siteUrl = window.location.origin;
     console.log(siteUrl);
     const { error } = await supabase.auth.signInWithOtp({
       email,
