@@ -16,7 +16,7 @@ export default function LandingPage() {
   
   const sendLink = async () => {
     setLoading(true);
-    const siteUrl = window.location.origin;
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
     console.log(siteUrl);
     const { error } = await supabase.auth.signInWithOtp({
       email,
@@ -34,17 +34,14 @@ export default function LandingPage() {
   };
 
   useEffect(() => {
-    if (sent) {
-      const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === "SIGNED_IN" && session) {
-          router.push("/dashboard");
-        }
-      });
-      return () => {
-        authListener.subscription.unsubscribe();
-      };
-    }
-  }, [sent, router]);
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        router.push("/dashboard");
+      }
+    };
+    checkSession();
+  }, [router]);
 
   const handleGetStarted = () => {
     setShowLogin(true);
