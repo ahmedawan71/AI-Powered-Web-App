@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/api/lib/supabaseClient";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function LandingPage() {
   const [showLogin, setShowLogin] = useState(false);
@@ -11,7 +12,8 @@ export default function LandingPage() {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
+  const [isModalOpen, setIsModalOpen] = useState(false); 
+  
   const sendLink = async () => {
     setLoading(true);
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
@@ -52,6 +54,10 @@ export default function LandingPage() {
     setShowLogin(false);
     setEmail("");
     setSent(false);
+  };
+
+  const handleSeeHowItWorks = () => {
+    setIsModalOpen(true);
   };
 
   if (showLogin) {
@@ -176,6 +182,7 @@ export default function LandingPage() {
             </Button>
             <Button 
               variant="outline" 
+              onClick={handleSeeHowItWorks}
               size="lg"
               className="bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/50 px-8 py-4 rounded-xl text-lg transition-all duration-300"
             >
@@ -217,6 +224,58 @@ export default function LandingPage() {
           </div>
         </div>
       </div>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="bg-glass rounded-2xl p-8 shadow-2xl max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-3xl font-bold text-white mb-4">How It Works</DialogTitle>
+            <DialogDescription className="text-white/80 text-lg">
+              Follow these simple steps to tailor your resume with AI precision.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-8 mt-6">
+            <div className="flex items-start">
+              <div className="bg-gradient-primary rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                <span className="text-black font-bold text-xl">1</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-white">Input Your Resume & Job Description</h3>
+                <p className="text-white/70 mt-2">
+                  Paste your current resume and the job description you’re applying for into the app.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start">
+              <div className="bg-gradient-primary rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                <span className="text-black font-bold text-xl">2</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-white">AI Analyzes & Tailors</h3>
+                <p className="text-white/70 mt-2">
+                  Our AI processes your input and optimizes your resume to match the job perfectly.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start">
+              <div className="bg-gradient-primary rounded-full w-12 h-12 flex items-center justify-center mr-4">
+                <span className="text-black font-bold text-xl">3</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-white">Review & Refine</h3>
+                <p className="text-white/70 mt-2">
+                  Check the tailored resume and feedback, then make any final adjustments.
+                </p>
+              </div>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => setIsModalOpen(false)}
+            className="mt-8 w-full bg-white/10 border-white/30 text-white hover:bg-white/20 hover:border-white/50 px-8 py-4 rounded-xl text-lg transition-all duration-300"
+          >
+            Close
+          </Button>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
