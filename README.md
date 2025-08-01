@@ -1,6 +1,6 @@
 # ResumeTailor_n8n
 
-ResumeTailor_n8n is a web application that leverages AI to tailor resumes based on job descriptions. Built with Next.js and Shadcn for the frontend, it provides a modern, user-friendly interface for users to input their resume and job description, receive a tailored resume, and view AI-generated feedback. The backend uses Supabase for authentication and data storage, while the AI logic is handled by a separate repository deployed on Railway.
+ResumeTailor_n8n is a web application that leverages AI to tailor resumes based on job descriptions. Built with Next.js and Shadcn for the frontend, it provides a modern, user-friendly interface for users to input their resume and job description, receive a tailored resume, and view AI-generated feedback. The backend uses Supabase for authentication and MongoDB for user data storage, while the AI logic is handled by a separate repository deployed on Railway.
 
 ## Table of Contents
 - [Features](#features)
@@ -17,6 +17,7 @@ ResumeTailor_n8n is a web application that leverages AI to tailor resumes based 
 ## Features
 - **AI-Powered Resume Tailoring**: Automatically optimizes resumes to align with job descriptions.
 - **User Authentication**: Secure login using Supabase's magic link via email.
+- **User Data Storage**: Stores user information in MongoDB for efficient data management.
 - **Resume Storage**: Saves original and tailored resumes in a Supabase database.
 - **Feedback System**: Provides AI-generated feedback on resume improvements.
 - **PDF Download**: Allows users to download tailored resumes as PDF files (using jsPDF).
@@ -25,7 +26,7 @@ ResumeTailor_n8n is a web application that leverages AI to tailor resumes based 
 
 ## Tech Stack
 - **Frontend**: Next.js, Shadcn, Tailwind CSS
-- **Backend**: Next.js API Routes, Supabase (Authentication & Database)
+- **Backend**: Next.js API Routes, Supabase (Authentication & Resume Storage), MongoDB (User Data Storage)
 - **AI Logic**: n8n (deployed on Railway)
 - **PDF Generation**: jsPDF
 - **Styling**: Tailwind CSS with custom gradients and glassmorphism effects
@@ -62,7 +63,8 @@ The AI logic for resume tailoring is implemented in a separate repository and de
 ## Prerequisites
 - Node.js (v18 or higher)
 - npm or yarn
-- Supabase account for authentication and database
+- Supabase account for authentication and resume storage
+- MongoDB instance for user data storage
 - Railway account for deploying the AI logic (optional, if modifying the AI service)
 - Git (for cloning the repository)
 
@@ -93,10 +95,12 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 N8N_WEBHOOK_URL=your_n8n_webhook_url
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+MONGODB_URI=your_mongodb_connection_string
 ```
 - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Obtain from your Supabase project settings.
 - `N8N_WEBHOOK_URL`: The webhook URL for the AI service (from the Railway deployment).
 - `NEXT_PUBLIC_SITE_URL`: The base URL of your app (e.g., `http://localhost:3000` for development).
+- `MONGODB_URI`: The connection string for your MongoDB instance.
 
 ## Usage
 1. **Sign Up/Login**: Visit the landing page and enter your email to receive a magic link for authentication.
